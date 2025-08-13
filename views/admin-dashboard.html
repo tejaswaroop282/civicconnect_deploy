@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CivicConnect</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <img src="/images/logo.png" alt="CivicConnect Logo" class="navbar-logo me-2" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                <span class="logo-text" style="display: none;">CC</span>
+                CivicConnect Admin
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin-dashboard.html">Dashboard</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <span id="userName">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+                <p class="text-muted">Manage and respond to civic issues reported by citizens</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-primary" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert container -->
+        <div id="alertContainer"></div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-exclamation-circle fs-1 mb-2"></i>
+                        <h4 id="totalIssues">0</h4>
+                        <p class="mb-0">Total Issues</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clock fs-1 mb-2"></i>
+                        <h4 id="pendingIssues">0</h4>
+                        <p class="mb-0">Pending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-gear fs-1 mb-2"></i>
+                        <h4 id="inProgressIssues">0</h4>
+                        <p class="mb-0">In Progress</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-1 mb-2"></i>
+                        <h4 id="resolvedIssues">0</h4>
+                        <p class="mb-0">Resolved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="card-title">Filter Issues</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="categoryFilter" class="form-label">Category</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="Road Maintenance">Road Maintenance</option>
+                            <option value="Street Lighting">Street Lighting</option>
+                            <option value="Waste Management">Waste Management</option>
+                            <option value="Water & Utilities">Water & Utilities</option>
+                            <option value="Parks & Recreation">Parks & Recreation</option>
+                            <option value="Public Safety">Public Safety</option>
+                            <option value="Environmental">Environmental</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="priorityFilter" class="form-label">Priority</label>
+                        <select class="form-select" id="priorityFilter">
+                            <option value="">All Priorities</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issues List -->
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Reported Issues (<span id="issueCount">0</span>)</h5>
+                        <small class="text-muted">Last updated: <span id="lastUpdated">Never</span></small>
+                    </div>
+                    <div class="card-body">
+                        <div id="loadingSpinner" class="text-center py-4">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading issues...</p>
+                        </div>
+                        <div id="issuesList"></div>
+                        <div id="noIssues" class="text-center py-4" style="display: none;">
+                            <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                            <h5 class="text-muted">No issues found</h5>
+                            <p class="text-muted">No issues match your current filters.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Issue Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateForm">
+                        <input type="hidden" id="updateIssueId">
+                        <div class="mb-3">
+                            <label for="updateStatus" class="form-label">Status</label>
+                            <select class="form-select" id="updateStatus" required>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminRemarks" class="form-label">Admin Remarks</label>
+                            <textarea class="form-control" id="adminRemarks" rows="3" maxlength="500" 
+                                      placeholder="Add comments about the status update..."></textarea>
+                            <div class="form-text">Maximum 500 characters</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUpdate()">
+                        <span class="spinner-border spinner-border-sm me-2" id="updateSpinner" style="display: none;"></span>
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 CivicConnect. Making cities better, one report at a time.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    let allIssues = [];
+    let currentUser = null;
+    let updateModal = null;
+
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('Admin dashboard loading...');
+        
+        // Initialize modal
+        updateModal = new bootstrap.Modal(document.getElementById('updateModal'));
+        
+        try {
+            const response = await fetch('/api/auth/check');
+            if (!response.ok) {
+                console.log('Not authenticated, redirecting to login');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            const data = await response.json();
+            currentUser = data.user;
+            
+            console.log('Current user:', currentUser);
+            
+            if (!currentUser.isAdmin) {
+                console.log('Not admin, redirecting to user dashboard');
+                window.location.href = '/dashboard.html';
+                return;
+            }
+            
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            // Load dashboard data
+            await loadDashboardData();
+            
+            // Set up filter event listeners
+            setupFilters();
+            
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            window.location.href = '/login.html';
+        }
+    });
+
+    // Setup filter event listeners
+    function setupFilters() {
+        document.getElementById('statusFilter').addEventListener('change', loadDashboardData);
+        document.getElementById('categoryFilter').addEventListener('change', loadDashboardData);
+        document.getElementById('priorityFilter').addEventListener('change', loadDashboardData);
+    }
+
+    // Load dashboard data with filters
+    async function loadDashboardData() {
+        try {
+            console.log('Loading dashboard data...');
+            
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('issuesList').innerHTML = '';
+            document.getElementById('noIssues').style.display = 'none';
+            
+            // Get filter values
+            const statusFilter = document.getElementById('statusFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (statusFilter) params.append('status', statusFilter);
+            if (categoryFilter) params.append('category', categoryFilter);
+            if (priorityFilter) params.append('priority', priorityFilter);
+            
+            console.log('Filters applied:', { statusFilter, categoryFilter, priorityFilter });
+            
+            const response = await fetch(`/api/admin/dashboard?${params}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Dashboard data received:', data);
+            
+            if (data.success) {
+                allIssues = data.issues || [];
+                updateStats(data.stats);
+                displayIssues(allIssues);
+                updateLastUpdated();
+            } else {
+                throw new Error(data.error || 'Failed to load dashboard data');
+            }
+            
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            document.getElementById('loadingSpinner').style.display = 'none';
+            showAlert('Failed to load dashboard data: ' + error.message, 'danger');
+        }
+    }
+
+    // Update statistics
+    function updateStats(stats) {
+        if (stats) {
+            document.getElementById('totalIssues').textContent = stats.total || 0;
+            document.getElementById('pendingIssues').textContent = stats.pending || 0;
+            document.getElementById('inProgressIssues').textContent = stats.inProgress || 0;
+            document.getElementById('resolvedIssues').textContent = stats.resolved || 0;
+            
+            console.log('Stats updated:', stats);
+        }
+    }
+
+    // Display issues
+    function displayIssues(issues) {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('issueCount').textContent = issues.length;
+        
+        if (issues.length === 0) {
+            document.getElementById('noIssues').style.display = 'block';
+            document.getElementById('issuesList').innerHTML = '';
+            return;
+        }
+        
+        document.getElementById('noIssues').style.display = 'none';
+        
+        const issuesHtml = issues.map(issue => `
+            <div class="card mb-3 issue-card status-${issue.status}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">${escapeHtml(issue.title)}</h5>
+                                <span class="badge bg-${getPriorityColor(issue.priority)} ms-2">${issue.priority.toUpperCase()}</span>
+                            </div>
+                            <p class="card-text text-muted">${escapeHtml(issue.description.substring(0, 150))}${issue.description.length > 150 ? '...' : ''}</p>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="badge bg-secondary">${escapeHtml(issue.category)}</span>
+                                <span class="badge bg-${getStatusColor(issue.status)}">${issue.status.replace('-', ' ').toUpperCase()}</span>
+                                <small class="text-muted"><i class="bi bi-geo-alt"></i> ${escapeHtml(issue.location)}</small>
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-person"></i> ${escapeHtml(issue.reportedBy?.name || 'Unknown')} | 
+                                <i class="bi bi-calendar"></i> ${new Date(issue.createdAt).toLocaleDateString()}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            ${issue.imageUrl ? `<img src="${issue.imageUrl}" class="img-fluid issue-image mb-2" alt="Issue photo" style="max-height: 120px; border-radius: 8px;">` : ''}
+                            <div class="d-flex flex-column gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="viewIssue('${issue._id}')">
+                                    <i class="bi bi-eye"></i> View Details
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="updateIssue('${issue._id}', '${issue.status}', '${escapeHtml(issue.adminRemarks || '')}')">
+                                    <i class="bi bi-pencil"></i> Update Status
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    ${issue.adminRemarks ? `
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <strong>Admin Update:</strong> ${escapeHtml(issue.adminRemarks)}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('issuesList').innerHTML = issuesHtml;
+        console.log(`Displayed ${issues.length} issues`);
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Get status color for badges
+    function getStatusColor(status) {
+        switch(status) {
+            case 'pending': return 'warning';
+            case 'in-progress': return 'info';
+            case 'resolved': return 'success';
+            default: return 'secondary';
+        }
+    }
+
+    // Get priority color for badges
+    function getPriorityColor(priority) {
+        switch(priority) {
+            case 'high': return 'danger';
+            case 'medium': return 'warning';
+            case 'low': return 'success';
+            default: return 'secondary';
+        }
+    }
+
+    // View issue details
+    function viewIssue(issueId) {
+        window.location.href = `/issue-detail.html?id=${issueId}`;
+    }
+
+    // Update issue status
+    function updateIssue(issueId, currentStatus, currentRemarks) {
+        document.getElementById('updateIssueId').value = issueId;
+        document.getElementById('updateStatus').value = currentStatus;
+        document.getElementById('adminRemarks').value = currentRemarks;
+        
+        updateModal.show();
+    }
+
+    // Save status update
+    async function saveUpdate() {
+        const issueId = document.getElementById('updateIssueId').value;
+        const status = document.getElementById('updateStatus').value;
+        const remarks = document.getElementById('adminRemarks').value;
+        
+        const saveBtn = document.querySelector('#updateModal .btn-primary');
+        const spinner = document.getElementById('updateSpinner');
+        
+        try {
+            // Show loading state
+            saveBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+            
+            console.log('Updating issue:', { issueId, status, remarks });
+            
+            const response = await fetch(`/api/admin/issues/${issueId}/update`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status, adminRemarks: remarks })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                updateModal.hide();
+                showAlert('Issue updated successfully!', 'success');
+                await loadDashboardData(); // Reload data
+            } else {
+                throw new Error(data.error || 'Failed to update issue');
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+            showAlert('Failed to update issue: ' + error.message, 'danger');
+        } finally {
+            // Restore button state
+            saveBtn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    }
+
+    // Refresh data
+    async function refreshData() {
+        await loadDashboardData();
+        showAlert('Data refreshed successfully!', 'success');
+    }
+
+    // Update last updated timestamp
+    function updateLastUpdated() {
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Show alert
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertId = 'alert-' + Date.now();
+        
+        const alertHtml = `
+            <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        alertContainer.innerHTML = alertHtml;
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            const alertElement = document.getElementById(alertId);
+            if (alertElement) {
+                alertElement.remove();
+            }
+        }, 5000);
+        
+        // Scroll to top to show alert
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    </script>
+</body>
+</html>

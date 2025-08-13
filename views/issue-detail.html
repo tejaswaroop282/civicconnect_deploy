@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Details - CivicConnect</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <img src="/images/logo.png" alt="CivicConnect Logo" class="navbar-logo me-2" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                <span class="logo-text" style="display: none;">CC</span>
+                CivicConnect
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="dashboardLink">Dashboard</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div id="loadingSpinner" class="text-center py-5">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        
+        <div id="issueContent" style="display: none;">
+            <!-- Back Button -->
+            <div class="row mb-3">
+                <div class="col">
+                    <button class="btn btn-outline-secondary" onclick="goBack()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+
+            <!-- Issue Details Card -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h4 class="mb-0" id="issueTitle">Issue Title</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Category:</strong>
+                                    <span class="badge bg-secondary ms-2" id="issueCategory">Category</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong>
+                                    <span class="badge ms-2" id="issueStatus">Status</span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Priority:</strong>
+                                    <span class="badge ms-2" id="issuePriority">Priority</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Reported Date:</strong>
+                                    <span id="issueDate">Date</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Location:</strong>
+                                <p class="mb-0" id="issueLocation">Location</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Description:</strong>
+                                <p id="issueDescription">Description</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Reported By:</strong>
+                                <span id="reportedBy">Reporter Name</span>
+                            </div>
+                            
+                            <div id="adminRemarksSection" style="display: none;">
+                                <div class="alert alert-info">
+                                    <strong>Admin Update:</strong>
+                                    <p class="mb-0" id="adminRemarks">Admin remarks</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <!-- Issue Image -->
+                    <div class="card shadow mb-3" id="imageCard" style="display: none;">
+                        <div class="card-header">
+                            <h6 class="mb-0">Issue Photo</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <img id="issueImage" class="img-fluid w-100" alt="Issue photo">
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Actions (only for admins) -->
+                    <div class="card shadow" id="adminActions" style="display: none;">
+                        <div class="card-header">
+                            <h6 class="mb-0">Admin Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary w-100 mb-2" onclick="updateStatus()">
+                                <i class="bi bi-pencil"></i> Update Status
+                            </button>
+                            <button class="btn btn-outline-info w-100" onclick="addRemarks()">
+                                <i class="bi bi-chat-text"></i> Add Remarks
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorMessage" class="alert alert-danger" style="display: none;">
+            <h5>Issue Not Found</h5>
+            <p>The requested issue could not be found or you don't have permission to view it.</p>
+            <button class="btn btn-primary" onclick="goBack()">Go Back</button>
+        </div>
+    </main>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Issue Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateForm">
+                        <div class="mb-3">
+                            <label for="updateStatus" class="form-label">Status</label>
+                            <select class="form-select" id="updateStatus" required>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="updateRemarks" class="form-label">Admin Remarks</label>
+                            <textarea class="form-control" id="updateRemarks" rows="3" maxlength="500" 
+                                      placeholder="Add comments about the status update..."></textarea>
+                            <div class="form-text">Maximum 500 characters</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUpdate()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 CivicConnect. Making cities better, one report at a time.</p>
+            <p class="small text-muted">Built with Node.js, Express, MongoDB & Bootstrap</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    let currentUser = null;
+    let currentIssue = null;
+    let issueId = null;
+
+    // Get issue ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    issueId = urlParams.get('id');
+
+    // Check authentication and load issue
+    document.addEventListener('DOMContentLoaded', async function() {
+        if (!issueId) {
+            showError();
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/auth/check');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            const data = await response.json();
+            currentUser = data.user;
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            // Set dashboard link based on user type
+            const dashboardLink = document.getElementById('dashboardLink');
+            if (currentUser.isAdmin) {
+                dashboardLink.href = '/admin-dashboard.html';
+                dashboardLink.textContent = 'Admin Dashboard';
+            } else {
+                dashboardLink.href = '/dashboard.html';
+                dashboardLink.textContent = 'Dashboard';
+            }
+            
+            await loadIssue();
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            window.location.href = '/login.html';
+        }
+    });
+
+    // Load issue details
+    async function loadIssue() {
+        try {
+            const response = await fetch(`/api/issues/${issueId}`);
+            if (!response.ok) {
+                showError();
+                return;
+            }
+            
+            const data = await response.json();
+            currentIssue = data.issue;
+            
+            displayIssue(currentIssue);
+            
+        } catch (error) {
+            console.error('Error loading issue:', error);
+            showError();
+        }
+    }
+
+    // Display issue details
+    function displayIssue(issue) {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('issueContent').style.display = 'block';
+        
+        // Basic details
+        document.getElementById('issueTitle').textContent = issue.title;
+        document.getElementById('issueCategory').textContent = issue.category;
+        document.getElementById('issueLocation').textContent = issue.location;
+        document.getElementById('issueDescription').textContent = issue.description;
+        document.getElementById('issueDate').textContent = new Date(issue.createdAt).toLocaleDateString();
+        document.getElementById('reportedBy').textContent = issue.reportedBy?.name || 'Unknown';
+        
+        // Status badge
+        const statusBadge = document.getElementById('issueStatus');
+        statusBadge.textContent = issue.status.replace('-', ' ').toUpperCase();
+        statusBadge.className = `badge ms-2 bg-${getStatusColor(issue.status)}`;
+        
+        // Priority badge
+        const priorityBadge = document.getElementById('issuePriority');
+        priorityBadge.textContent = issue.priority.toUpperCase();
+        priorityBadge.className = `badge ms-2 bg-${getPriorityColor(issue.priority)}`;
+        
+        // Image
+        if (issue.imageUrl) {
+            document.getElementById('imageCard').style.display = 'block';
+            document.getElementById('issueImage').src = issue.imageUrl;
+        }
+        
+        // Admin remarks
+        if (issue.adminRemarks) {
+            document.getElementById('adminRemarksSection').style.display = 'block';
+            document.getElementById('adminRemarks').textContent = issue.adminRemarks;
+        }
+        
+        // Show admin actions if user is admin
+        if (currentUser.isAdmin) {
+            document.getElementById('adminActions').style.display = 'block';
+        }
+    }
+
+    // Show error message
+    function showError() {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+    }
+
+    // Get status color for badges
+    function getStatusColor(status) {
+        switch(status) {
+            case 'pending': return 'warning';
+            case 'in-progress': return 'info';
+            case 'resolved': return 'success';
+            default: return 'secondary';
+        }
+    }
+
+    // Get priority color for badges
+    function getPriorityColor(priority) {
+        switch(priority) {
+            case 'high': return 'danger';
+            case 'medium': return 'warning';
+            case 'low': return 'success';
+            default: return 'secondary';
+        }
+    }
+
+    // Update status (admin only)
+    function updateStatus() {
+        document.getElementById('updateStatus').value = currentIssue.status;
+        document.getElementById('updateRemarks').value = currentIssue.adminRemarks || '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('updateModal'));
+        modal.show();
+    }
+
+    // Add remarks (admin only)
+    function addRemarks() {
+        updateStatus(); // Same modal for now
+    }
+
+    // Save status update
+    async function saveUpdate() {
+        const status = document.getElementById('updateStatus').value;
+        const remarks = document.getElementById('updateRemarks').value;
+        
+        try {
+            const response = await fetch(`/api/admin/issues/${issueId}/update`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status, adminRemarks: remarks })
+            });
+            
+            if (response.ok) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('updateModal'));
+                modal.hide();
+                await loadIssue(); // Reload issue
+                showAlert('Issue updated successfully!', 'success');
+            } else {
+                const data = await response.json();
+                showAlert(data.error || 'Failed to update issue', 'danger');
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+            showAlert('Failed to update issue', 'danger');
+        }
+    }
+
+    // Go back to dashboard
+    function goBack() {
+        if (currentUser && currentUser.isAdmin) {
+            window.location.href = '/admin-dashboard.html';
+        } else {
+            window.location.href = '/dashboard.html';
+        }
+    }
+
+    function showAlert(message, type = 'info') {
+        // Create and show a temporary alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 3000);
+    }
+    </script>
+</body>
+</html>
