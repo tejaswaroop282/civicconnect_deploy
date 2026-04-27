@@ -4,6 +4,10 @@ const multer = require("multer")
 const path = require("path")
 const Issue = require("../models/Issue")
 const User = require("../models/User")
+const { classifyIssue } = require("../services/classificationAgent")
+const { classifyIssueWithGemini } = require("../services/geminiAgent")
+const { findNearbyDuplicate } = require("../services/duplicateAgent")
+const { calculateDeadline } = require("../services/slaAgent")
 const router = express.Router()
 
 // Configure multer for file uploads
@@ -52,21 +56,57 @@ router.post("/api/issues/report", requireAuth, upload.single("image"), async (re
     console.log("Issue report request:", req.body)
     console.log("File:", req.file)
 
-    const { title, description, category, location, priority } = req.body
+    const { title, description, category, location, latitude, longitude, priority } = req.body
+    const lat = Number.parseFloat(latitude)
+    const lng = Number.parseFloat(longitude)
 
     // Basic validation
-    if (!title || !description || !category || !location) {
+    if (!title || !description || !location) {
       return res.status(400).json({ error: "All required fields must be filled" })
     }
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return res.status(400).json({ error: "Please select a valid location on the map" })
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return res.status(400).json({ error: "Latitude/longitude values are out of range" })
+    }
+
+    // 1) Local rule-based classification first.
+    //    If it can't classify, fall back to Gemini (only if it returns a valid category).
+    const classifiedCategory = await classifyIssue(description)
+    let issueCategory = classifiedCategory || category
+    if (!classifiedCategory) {
+      const geminiCategory = await classifyIssueWithGemini(description)
+      if (geminiCategory) issueCategory = geminiCategory
+    }
+    if (!issueCategory) {
+      return res.status(400).json({ error: "Category is required or could not be classified" })
+    }
+
+    // 2) Find nearby duplicate issue within 100 meters
+    const nearbyDuplicate = await findNearbyDuplicate(issueCategory, lng, lat)
+
+    // 3) Calculate SLA deadline for selected category
+    const deadline = calculateDeadline(issueCategory)
 
     // Create new issue
     const issueData = {
       title: title.trim(),
       description: description.trim(),
-      category,
-      location: location.trim(),
+      category: issueCategory,
+      location: {
+        type: "Point",
+        coordinates: [lng, lat],
+      },
       priority: priority || "medium",
       reportedBy: req.session.user.id,
+      deadline,
+    }
+
+    // 4) Mark duplicate metadata when a nearby issue exists
+    if (nearbyDuplicate) {
+      issueData.isDuplicate = true
+      issueData.duplicateOf = nearbyDuplicate._id
     }
 
     // Add image URL if file was uploaded

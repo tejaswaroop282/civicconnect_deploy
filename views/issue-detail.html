@@ -275,7 +275,14 @@
         // Basic details
         document.getElementById('issueTitle').textContent = issue.title;
         document.getElementById('issueCategory').textContent = issue.category;
-        document.getElementById('issueLocation').textContent = issue.location;
+        if (issue.location && Array.isArray(issue.location.coordinates)) {
+            const lat = issue.location.coordinates[1];
+            const lng = issue.location.coordinates[0];
+            document.getElementById('issueLocation').textContent =
+                `Latitude: ${lat?.toFixed ? lat.toFixed(6) : lat}, Longitude: ${lng?.toFixed ? lng.toFixed(6) : lng}`;
+        } else {
+            document.getElementById('issueLocation').textContent = 'Location not available';
+        }
         document.getElementById('issueDescription').textContent = issue.description;
         document.getElementById('issueDate').textContent = new Date(issue.createdAt).toLocaleDateString();
         document.getElementById('reportedBy').textContent = issue.reportedBy?.name || 'Unknown';

@@ -361,7 +361,22 @@
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge bg-secondary">${escapeHtml(issue.category)}</span>
                                 <span class="badge bg-${getStatusColor(issue.status)}">${issue.status.replace('-', ' ').toUpperCase()}</span>
-                                <small class="text-muted"><i class="bi bi-geo-alt"></i> ${escapeHtml(issue.location)}</small>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i>
+                                    ${
+                                      issue.location && Array.isArray(issue.location.coordinates)
+                                        ? `Latitude: ${
+                                            issue.location.coordinates[1]?.toFixed
+                                              ? issue.location.coordinates[1].toFixed(6)
+                                              : issue.location.coordinates[1]
+                                          }, Longitude: ${
+                                            issue.location.coordinates[0]?.toFixed
+                                              ? issue.location.coordinates[0].toFixed(6)
+                                              : issue.location.coordinates[0]
+                                          }`
+                                        : "Location not available"
+                                    }
+                                </small>
                             </div>
                             <small class="text-muted">
                                 <i class="bi bi-person"></i> ${escapeHtml(issue.reportedBy?.name || 'Unknown')} | 

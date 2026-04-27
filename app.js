@@ -4,6 +4,7 @@ const mongoose = require("mongoose")
 const session = require("express-session")
 const path = require("path")
 const methodOverride = require("method-override")
+const { startSlaMonitor } = require("./jobs/slaMonitor")
 require("dotenv").config()
 
 const app = express()
@@ -17,7 +18,11 @@ const adminRoutes = require("./routes/admin")
 // Database connection to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/civicconnect")
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .then(() => {
+    console.log("✅ Connected to MongoDB")
+    startSlaMonitor()
+    console.log("⏰ SLA monitor started (runs every hour)")
+  })
   .catch((err) => console.error("❌ MongoDB connection error:", err))
 
 // Middleware setup
@@ -60,7 +65,13 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ error: "Invalid request payload. Please refresh and try again." })
+  }
   console.error("Server Error:", err)
+  if (req.originalUrl.startsWith("/register") || req.originalUrl.startsWith("/login")) {
+    return res.status(500).json({ error: "Request failed. Please try again." })
+  }
   res.status(500).sendFile(path.join(__dirname, "views", "500.html"))
 })
 

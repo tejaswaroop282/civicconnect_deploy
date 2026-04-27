@@ -32,10 +32,15 @@ const issueSchema = new mongoose.Schema(
       ],
     },
     location: {
-      type: String,
-      required: [true, "Location is required"],
-      trim: true,
-      maxlength: [200, "Location cannot exceed 200 characters"],
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
     },
     status: {
       type: String,
@@ -65,6 +70,22 @@ const issueSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    isDuplicate: {
+      type: Boolean,
+      default: false,
+    },
+    duplicateOf: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Issue",
+      default: null,
+    },
+    deadline: {
+      type: Date,
+    },
+    isOverdue: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
@@ -75,6 +96,7 @@ const issueSchema = new mongoose.Schema(
 issueSchema.index({ status: 1, createdAt: -1 })
 issueSchema.index({ reportedBy: 1, createdAt: -1 })
 issueSchema.index({ category: 1 })
+issueSchema.index({ location: "2dsphere" })
 
 // Virtual for formatted creation date
 issueSchema.virtual("formattedDate").get(function () {

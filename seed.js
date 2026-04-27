@@ -125,7 +125,10 @@ async function createIssues() {
         description:
           "There's a dangerous pothole on Main Street near the intersection with Oak Avenue. It's about 2 feet wide and very deep. Several cars have been damaged.",
         category: "Road Maintenance",
-        location: "Main Street & Oak Avenue",
+        location: {
+          type: "Point",
+          coordinates: [-122.4194, 37.7749], // Example: San Francisco
+        },
         status: "pending",
         reportedBy: citizens[0]._id,
         imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500",
@@ -136,7 +139,10 @@ async function createIssues() {
         description:
           "The street light at the corner of Pine Street and 2nd Avenue has been out for over a week. It's creating a safety hazard for pedestrians at night.",
         category: "Street Lighting",
-        location: "Pine Street & 2nd Avenue",
+        location: {
+          type: "Point",
+          coordinates: [-73.9857, 40.7484], // Example: New York
+        },
         status: "in-progress",
         reportedBy: citizens[1]._id,
         imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=500",
@@ -148,7 +154,10 @@ async function createIssues() {
         description:
           "The garbage bins on Elm Street haven't been collected for 3 days. The smell is getting bad and attracting pests.",
         category: "Waste Management",
-        location: "Elm Street (entire block)",
+        location: {
+          type: "Point",
+          coordinates: [-0.1278, 51.5074], // Example: London
+        },
         status: "resolved",
         reportedBy: citizens[2]._id,
         imageUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500",
@@ -160,7 +169,10 @@ async function createIssues() {
         description:
           "There's a significant water leak near the playground in City Park. Water is pooling and creating muddy conditions.",
         category: "Water & Utilities",
-        location: "City Park - Near Playground",
+        location: {
+          type: "Point",
+          coordinates: [2.3522, 48.8566], // Example: Paris
+        },
         status: "in-progress",
         reportedBy: citizens[3]._id,
         imageUrl: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=500",
@@ -172,7 +184,10 @@ async function createIssues() {
         description:
           "The road surface on Maple Avenue is severely cracked and uneven. It's causing damage to vehicles and is unsafe for cyclists.",
         category: "Road Maintenance",
-        location: "Maple Avenue (between 1st and 3rd Street)",
+        location: {
+          type: "Point",
+          coordinates: [151.2093, -33.8688], // Example: Sydney
+        },
         status: "pending",
         reportedBy: citizens[4]._id,
         imageUrl: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=500",
@@ -183,7 +198,10 @@ async function createIssues() {
         description:
           "Someone has been illegally dumping furniture and appliances behind the shopping center on Commerce Street.",
         category: "Environmental",
-        location: "Commerce Street Shopping Center (rear)",
+        location: {
+          type: "Point",
+          coordinates: [139.6917, 35.6895], // Example: Tokyo
+        },
         status: "resolved",
         reportedBy: citizens[0]._id,
         imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500",

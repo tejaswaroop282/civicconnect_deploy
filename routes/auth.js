@@ -14,10 +14,17 @@ router.post("/register", async (req, res) => {
     console.log("Registration request body:", req.body)
 
     const { name, email, password, confirmPassword, phone } = req.body
+    const trimmedName = name?.trim()
+    const normalizedEmail = email?.trim().toLowerCase()
+    const trimmedPhone = phone?.trim()
 
     // Basic validation
-    if (!name || !email || !password || !phone) {
+    if (!trimmedName || !normalizedEmail || !password || !trimmedPhone) {
       return res.status(400).json({ error: "All fields are required" })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" })
     }
 
     // Check if passwords match
@@ -26,19 +33,31 @@ router.post("/register", async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email })
+    const existingUser = await User.findOne({ email: normalizedEmail })
     if (existingUser) {
       return res.status(400).json({ error: "Email already registered" })
     }
 
     // Create new user
-    const user = new User({ name, email, password, phone })
+    const user = new User({
+      name: trimmedName,
+      email: normalizedEmail,
+      password,
+      phone: trimmedPhone,
+    })
     await user.save()
 
     console.log("✅ User registered successfully:", user.email)
     res.json({ success: true, message: "Registration successful! Please login." })
   } catch (error) {
     console.error("Registration error:", error)
+    if (error.name === "ValidationError") {
+      const firstValidationError = Object.values(error.errors)[0]
+      return res.status(400).json({ error: firstValidationError?.message || "Invalid input data" })
+    }
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Email already registered" })
+    }
     res.status(500).json({ error: "Registration failed. Please try again." })
   }
 })
