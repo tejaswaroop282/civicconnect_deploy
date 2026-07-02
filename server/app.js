@@ -5,7 +5,7 @@ const session = require("express-session")
 const path = require("path")
 const methodOverride = require("method-override")
 const { startSlaMonitor } = require("./jobs/slaMonitor")
-require("dotenv").config()
+require("dotenv").config({ path: path.join(__dirname, ".env") })
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -44,8 +44,8 @@ app.use(
 )
 
 // Serve static files (CSS, JS, images, uploads)
-app.use(express.static(path.join(__dirname, "public")))
-app.use(express.static(path.join(__dirname, "views")))
+app.use(express.static(path.join(__dirname, "../client/public")))
+app.use(express.static(path.join(__dirname, "../client/views")))
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Route handlers
@@ -55,12 +55,12 @@ app.use("/", adminRoutes) // Admin panel routes
 
 // Home page route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "index.html"))
+  res.sendFile(path.join(__dirname, "../client/views", "index.html"))
 })
 
 // 404 Error handler for undefined routes
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "views", "404.html"))
+  res.status(404).sendFile(path.join(__dirname, "../client/views", "404.html"))
 })
 
 // Global error handler
@@ -72,7 +72,7 @@ app.use((err, req, res, next) => {
   if (req.originalUrl.startsWith("/register") || req.originalUrl.startsWith("/login")) {
     return res.status(500).json({ error: "Request failed. Please try again." })
   }
-  res.status(500).sendFile(path.join(__dirname, "views", "500.html"))
+  res.status(500).sendFile(path.join(__dirname, "../client/views", "500.html"))
 })
 
 // Start the server

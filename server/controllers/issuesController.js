@@ -1,57 +1,17 @@
-// Routes for handling civic issues - reporting, viewing, and managing
-const express = require("express")
-const multer = require("multer")
-const path = require("path")
 const Issue = require("../models/Issue")
 const User = require("../models/User")
 const { classifyIssue } = require("../services/classificationAgent")
 const { classifyIssueWithGemini } = require("../services/geminiAgent")
 const { findNearbyDuplicate } = require("../services/duplicateAgent")
 const { calculateDeadline } = require("../services/slaAgent")
-const router = express.Router()
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/")
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
-    cb(null, "issue-" + uniqueSuffix + path.extname(file.originalname))
-  },
-})
-
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Check file type
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true)
-    } else {
-      cb(new Error("Only image files are allowed!"), false)
-    }
-  },
-})
-
-// Middleware to check if user is authenticated
-const requireAuth = (req, res, next) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: "Authentication required" })
-  }
-  next()
-}
 
 // Show report issue page
-router.get("/report", (req, res) => {
+const showReport = (req, res) => {
   res.redirect("/report.html")
-})
+}
 
 // Handle issue reporting
-router.post("/api/issues/report", requireAuth, upload.single("image"), async (req, res) => {
+const reportIssue = async (req, res) => {
   try {
     console.log("Issue report request:", req.body)
     console.log("File:", req.file)
@@ -126,10 +86,10 @@ router.post("/api/issues/report", requireAuth, upload.single("image"), async (re
     console.error("Issue reporting error:", error)
     res.status(500).json({ error: "Failed to report issue. Please try again." })
   }
-})
+}
 
 // Get user's issues
-router.get("/api/issues/my-issues", requireAuth, async (req, res) => {
+const getUserIssues = async (req, res) => {
   try {
     const issues = await Issue.find({ reportedBy: req.session.user.id })
       .populate("reportedBy", "name email")
@@ -140,10 +100,10 @@ router.get("/api/issues/my-issues", requireAuth, async (req, res) => {
     console.error("Error fetching user issues:", error)
     res.status(500).json({ error: "Failed to fetch issues" })
   }
-})
+}
 
 // Get single issue details
-router.get("/api/issues/:id", requireAuth, async (req, res) => {
+const getIssueById = async (req, res) => {
   try {
     const issue = await Issue.findById(req.params.id).populate("reportedBy", "name email")
 
@@ -161,14 +121,20 @@ router.get("/api/issues/:id", requireAuth, async (req, res) => {
     console.error("Error fetching issue:", error)
     res.status(500).json({ error: "Failed to fetch issue details" })
   }
-})
+}
 
 // Show user dashboard
-router.get("/dashboard", (req, res) => {
+const showDashboard = (req, res) => {
   if (!req.session.user) {
     return res.redirect("/login.html")
   }
   res.redirect("/dashboard.html")
-})
+}
 
-module.exports = router
+module.exports = {
+  showReport,
+  reportIssue,
+  getUserIssues,
+  getIssueById,
+  showDashboard,
+}

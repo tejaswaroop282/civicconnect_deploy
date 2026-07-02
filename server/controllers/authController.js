@@ -1,15 +1,12 @@
-// Authentication routes - handles user registration, login, and logout
-const express = require("express")
 const User = require("../models/User")
-const router = express.Router()
 
 // Show registration page
-router.get("/register", (req, res) => {
+const showRegister = (req, res) => {
   res.redirect("/register.html")
-})
+}
 
 // Handle user registration
-router.post("/register", async (req, res) => {
+const registerUser = async (req, res) => {
   try {
     console.log("Registration request body:", req.body)
 
@@ -60,15 +57,15 @@ router.post("/register", async (req, res) => {
     }
     res.status(500).json({ error: "Registration failed. Please try again." })
   }
-})
+}
 
 // Show login page
-router.get("/login", (req, res) => {
+const showLogin = (req, res) => {
   res.redirect("/login.html")
-})
+}
 
 // Handle user login
-router.post("/login", async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     console.log("Login request body:", req.body)
 
@@ -107,10 +104,10 @@ router.post("/login", async (req, res) => {
     console.error("Login error:", error)
     res.status(500).json({ error: "Login failed. Please try again." })
   }
-})
+}
 
 // Check authentication status
-router.get("/api/auth/check", (req, res) => {
+const checkAuth = (req, res) => {
   if (req.session.user) {
     res.json({
       success: true,
@@ -122,16 +119,23 @@ router.get("/api/auth/check", (req, res) => {
   } else {
     res.status(401).json({ error: "Not authenticated" })
   }
-})
+}
 
 // Handle logout
-router.get("/logout", (req, res) => {
+const logoutUser = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err)
     }
     res.redirect("/")
   })
-})
+}
 
-module.exports = router
+module.exports = {
+  showRegister,
+  registerUser,
+  showLogin,
+  loginUser,
+  checkAuth,
+  logoutUser,
+}
