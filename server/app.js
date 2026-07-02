@@ -53,7 +53,7 @@ app.use("/", issueRoutes) // Issue reporting and viewing routes
 app.use("/", adminRoutes) // Admin panel routes
 
 // Wildcard handler to serve React SPA index.html for frontend routes
-app.get("*", (req, res) => {
+app.get("/*splat", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/dist", "index.html"))
 })
 
