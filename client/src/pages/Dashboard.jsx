@@ -94,6 +94,44 @@ export default function Dashboard() {
     }
   };
 
+  // Initialize Leaflet Map on modal open
+  useEffect(() => {
+    if (!showModal) return;
+
+    const timer = setTimeout(() => {
+      if (!window.L) return;
+      
+      const mapContainer = document.getElementById('map-picker');
+      if (!mapContainer) return;
+
+      const initLat = parseFloat(latitude) || 20.5937;
+      const initLng = parseFloat(longitude) || 78.9629;
+
+      const map = window.L.map('map-picker').setView([initLat, initLng], 5);
+      
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      let marker = window.L.marker([initLat, initLng]).addTo(map);
+
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        setLatitude(lat.toFixed(6));
+        setLongitude(lng.toFixed(6));
+        marker.setLatLng([lat, lng]);
+      });
+
+      // Cleanup map instance on close
+      return () => {
+        map.remove();
+      };
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [showModal]);
+
   return (
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
@@ -254,6 +292,10 @@ export default function Dashboard() {
                   class="block w-full rounded-xl border border-slate-200 py-2.5 px-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
                   placeholder="e.g. 5th Avenue, near Central Park"
                 />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Mark Location on Map (Click to Set)</label>
+                <div id="map-picker" class="h-48 w-full rounded-xl border border-slate-200 shadow-inner z-0 mb-3"></div>
               </div>
 
               <div class="grid grid-cols-2 gap-4">
