@@ -44,8 +44,7 @@ app.use(
 )
 
 // Serve static files (CSS, JS, images, uploads)
-app.use(express.static(path.join(__dirname, "../client/public")))
-app.use(express.static(path.join(__dirname, "../client/views")))
+app.use(express.static(path.join(__dirname, "../client/dist")))
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Route handlers
@@ -53,14 +52,9 @@ app.use("/", authRoutes) // Authentication routes (login, register, logout)
 app.use("/", issueRoutes) // Issue reporting and viewing routes
 app.use("/", adminRoutes) // Admin panel routes
 
-// Home page route
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/views", "index.html"))
-})
-
-// 404 Error handler for undefined routes
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, "../client/views", "404.html"))
+// Wildcard handler to serve React SPA index.html for frontend routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"))
 })
 
 // Global error handler

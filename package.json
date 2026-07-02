@@ -6,10 +6,7 @@
     "start": "node server/app.js",
     "dev": "node server/app.js",
     "seed": "node server/seed.js",
-    "next:build": "next build",
-    "next:dev": "next dev",
-    "next:start": "next start",
-    "lint": "next lint",
+    "build": "npm run build --prefix client",
     "test": "jest"
   },
   "dependencies": {

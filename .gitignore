@@ -24,9 +24,12 @@ tempCodeRunnerFile.js
 .vscode/
 .idea/
 
-# Next.js build output
+# Next.js & Vite build outputs
 .next/
 out/
+dist/
+client/dist/
+/client/dist/
 
 # Uploads / user generated content
 server/uploads/

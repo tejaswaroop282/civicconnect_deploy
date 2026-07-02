@@ -4,9 +4,6 @@ const adminController = require("../controllers/adminController")
 const { requireAdmin } = require("../middlewares/auth")
 const router = express.Router()
 
-// Show admin dashboard
-router.get("/admin-dashboard", adminController.showAdminDashboard)
-
 // Get all issues for admin dashboard
 router.get("/api/admin/issues", requireAdmin, adminController.getAdminIssues)
 
